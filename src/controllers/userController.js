@@ -1,4 +1,5 @@
 const userModel = require("../models/userModel");
+const jwt = require ('jsonwebtoken')
 
 const isValidString = function (data) {
   if (typeof data != "string" || data.trim().length === 0) {
@@ -101,4 +102,44 @@ const createUser = async function (req, res) {
     return res.status(500).send({ status: false, msg: error.message });
   }
 };
-module.exports = { createUser };
+
+const createLogin = async function (req , res ){
+    try{
+        let email= req.body.email
+        let password =req.body.password
+
+        if(!email) return res.status(400).send({ status: false, msg: "email is not present in body" });
+        if(!isValidString(email.trim())) return res.status(400).send({ status: false, msg: "email is wrong " });
+        if (!isEmailValid(email.trim())) return res.status(400).send({ status: false, msg: "email is not valid " });
+
+        if(!password) return res.status(400).send({ status: false, msg: "password is not present " });
+
+        let userDocument = await userModel.findOne({email : email.trim() ,password : password.trim()})
+        if (!userDocument) return res.status(400).send({ status: false, msg: "email or password is wrong or user not found with this details" });
+
+        let token = jwt.sign({
+            userId : userDocument._id.toString(),
+            group : "grp 42",
+            iat: Math.floor(Date.now() / 1000),
+            exp: Math.floor(Date.now() / 1000) + 50*60*60
+
+        },"project3group42")
+
+        return res.status(200).send({status: true,
+            message: 'Success',
+            data: token
+           })
+
+
+          
+
+           
+
+
+    }catch(error){
+        return res.status(500).send({ status: false, msg: error.message });
+    }
+}
+
+
+module.exports = { createUser ,createLogin};
