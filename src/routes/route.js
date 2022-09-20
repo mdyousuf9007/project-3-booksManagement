@@ -1,10 +1,13 @@
 const express = require('express')
-const route =express.Router()
+const router =express.Router()
 
-route.get('/test-me',function(req,res){
+
+const userController=require("../controllers/userController")
+router.get('/test-me',function(req,res){
     res.send({msg : "working properly"})
 })
 
+router.post("/register",userController.createUser)
 
 
 
@@ -15,5 +18,5 @@ route.get('/test-me',function(req,res){
 
 
 
-module.exports=route
+module.exports=router
 
