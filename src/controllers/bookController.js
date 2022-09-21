@@ -117,4 +117,83 @@ const getBooksDetails= async function(req,res){
     }
 }
 
-module.exports={getBooksDetails,createbook,getBookByQuery}
+//update api
+const updatebook = async function (req, res) {
+    try {
+        let bookId = req.params.bookId
+        if (!mongoose.Types.ObjectId.isValid(bookId)) {
+            return res.status(400).send({ status: false, msg: "BookId is not valid,please enter valid ID" })
+        }
+        let book = await bookModel.findOne({ _id: bookId, isDeleted: false })
+        if (!book) {
+            return res.status(404).send({ status: false, msg: "Book is not found for this ID" })
+        }
+        if (req.pass.userId !== book.userId.toString()) {
+            return res.status(403).send({ status: false, msg: "you are not authorised for this opretion" })
+        }
+        let data = req.body
+        if (data.title) {
+            let uniquetitle = await bookModel.findOne({ title: data.title })
+            if (uniquetitle) {
+                return res.status(400).send({ status: false, msg: "this title is already reserved" })
+            }
+        }
+        if (data.ISBN) {
+            let uniqueISBN = await bookModel.findOne({ ISBN: data.ISBN })
+            if (uniqueISBN) {
+                return res.status(400).send({ status: false, msg: "this ISBN Number is already reserved" })
+            }
+        }
+        if (data.title == "") {
+            return res.status(400).send({ status: false, msg: "book title value is empty" })
+        }
+        if (data.excerpt == "") {
+            return res.status(400).send({ status: false, msg: "book excerpt value is empty" })
+        }
+        if (data.ISBN == "") {
+            return res.status(400).send({ status: false, msg: "book ISBN Number field is empty" })
+        }
+        let updatedbook = await bookModel.findByIdAndUpdate(
+            { _id: bookId },
+            { $set: { title: data.title, ISBN: data.ISBN, excerpt: data.excerpt, releasedAt: moment(new Date()).format("YYYY-MM-DD") } },
+            { new: true })
+        return res.status(200).send({status:true, message: 'Success', updatedbook })
+    } catch (error) {
+        return res.status(500).send({ status: false, msg: error.message })
+    }
+}
+
+//delete api 
+ 
+const deleteBook= async function(req,res){
+    let data=req.params.bookId
+
+    if(!mongoose.Types.ObjectId.isValid(data) ){
+        return res.status(400).send({status:false,msg:"BookId is incorrect"})
+    }
+
+    let verifyId=await bookModel.findById(data)
+
+    
+    if(!verifyId){
+        return res.status(404).send({status:false,msg:"books not found "})
+    }
+    
+    if(verifyId.isDeleted===true){
+        return res.status(400).send({status:false,msg:"this book is already deleted"})
+    }
+
+
+    if(verifyId.isDeleted===false){
+        let deleteDocument=await bookModel.findOneAndUpdate({
+            $set:{
+                isDeleted:true
+            }
+            
+        })
+        return res.status(200).send({status:true,msg:"book is successfully deleted"})
+    }
+}
+
+
+module.exports={getBooksDetails,createbook,getBookByQuery,deleteBook,updatebook}
