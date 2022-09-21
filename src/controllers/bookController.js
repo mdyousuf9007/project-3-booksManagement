@@ -1,5 +1,6 @@
 const bookModel= require ("../models/bookModel")
 const reviewModel=require("../models/reviewModel")
+const userModel=require("../models/userModel")
 const moment = require('moment')
 const mongoose = require('mongoose')
 
@@ -40,7 +41,7 @@ try {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
         return res.status(400).send({ status: false, msg: "AuthorId is not valid,please enter valid ID" })
     }
-    let userbyid = await bookModel.findById(userId)
+    let userbyid = await userModel.findById(userId)
     if (!userbyid) {
         return res.status(400).send({ status: false, msg: "user is not exist" })
     }
@@ -70,6 +71,13 @@ const getBookByQuery = async function(req,res) {
     
     let bookDetails = await bookModel.find({isDeleted:false, ...queryData}).select({_id:1, title:1, excerpt:1, userId:1, category:1, releasedAt:1, reviews :1})
     if(bookDetails.length==0) return res.status(404).send({status: true,message: 'No book found with this details'})
+
+    let extraKeys=["userId","category","subcategory"]
+    for(field in queryData){
+        if(!extraKeys.includes(field)){
+            return res.status(400).send({status:false,msg:"this filter is not valid"})
+        }
+    }
 
     return res.status(200).send({status: true,
         message: 'Books list',
