@@ -1,21 +1,38 @@
-const jwt = require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
 
-const auth = function (req, res, next) {
-    try {
-        let token = req.headers['x-auth-key']
-        if (!token) {
-            res.status(400).send({ err: "you are not login" })
+const auth = async function (req, res, next) {
+  try {
+    const token = req.headers["x-auth-key"];
+    if (!token)
+      return res
+        .status(401)
+        .send({ status: false, msg: "Please provide token" });
+    //........................verifying the token through Jwt..............................
+    let validToken = jwt.verify(
+      token,
+      "project3group42",
+      function (error, token) {
+        if (error) {
+          return undefined;
+        } else {
+          return token;
         }
-        try {
-            let decodedtoken = jwt.verify(token, "this is very very secret key")
-            req.pass = decodedtoken;
-            next()
-        } catch (err) {
-            return res.status(400).send({ status: false, msg: `${err.message} please check your token` })
-        }
-    } catch (err) {
-        res.status(500).send(err.message)
+      }
+    );
+    if (validToken == undefined) {
+      return res
+        .status(401)
+        .send({ status: false, msg: "please provide valid token in headers" });
     }
-}
 
-module.exports.auth = auth
+    // Passing the decoded token inside req to acces it in controllers for authorisation.
+
+    req.validToken = validToken;
+
+    next();
+  } catch (error) {
+    return res.status(500).send({ status: false, msg: error.message });
+  }
+};
+
+module.exports.auth = auth;

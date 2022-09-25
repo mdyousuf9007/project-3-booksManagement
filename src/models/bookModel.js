@@ -51,6 +51,10 @@ const booksSchema = new mongoose.Schema(
       type: Date,
       require: true,
     },
+    deletedAt:{
+      type:Date,
+      default:null
+    }
   },
   { timestamps: true }
 );
