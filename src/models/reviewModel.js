@@ -21,6 +21,7 @@ const reviewSchema = new mongoose.Schema ({
         require : true
     },
     review: String,
+    
     isDeleted: {
         type : Boolean, 
         default: false

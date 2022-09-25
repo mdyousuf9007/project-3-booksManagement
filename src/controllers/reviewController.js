@@ -9,6 +9,14 @@ const isValid = function (value) {
     return false;
   return true;
 };
+
+//..............validation for number in String using Regex...............
+const isNumberInString = function (data) {
+  const isNumberInStringRegex = /^[a-zA-Z ]*$/;
+
+  return isNumberInStringRegex.test(data);
+}
+
 //==============================post api createReview====================================
 const createreview = async function (req, res) {
   try {
@@ -59,6 +67,17 @@ const createreview = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, msg: "Enter rating only between 1 to 5" });
+    }
+
+    //keys value validation can't use number in String
+    let letters = ["review", "reviewedBy"];
+    for (field of letters) {
+      if (!isNumberInString(req.body[field])) {
+        return res.status(400).send({
+          status: false,
+          msg: `You can't use number in==>${field}`,
+        });
+      }
     }
 
     let savedData = await reviewModel.create(data);

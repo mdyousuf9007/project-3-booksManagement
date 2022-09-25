@@ -41,11 +41,11 @@ router.put("/books/:bookId/review/:reviewId", reviewController.updateReview);
 router.delete( "/books/:bookId/review/:reviewId",reviewController.deleteReviewsById);
 //=====================❌❌❌❌❌❌❌❌=========================================
 
-//............IF THERE IS NO ID IN THE PATH PARAMS SO THIS API SEND A ERROR MESSAGE....
+//checking if api is correct or not
 router.all("/*", function (req, res) {
   res
     .status(404)
-    .send({ status: false, msg: "please provide Id in path param" });
+    .send({ status: false, msg: " please provide valid api " });
 });
 
 module.exports = router;

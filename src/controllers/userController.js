@@ -158,15 +158,14 @@ const createLogin = async function (req, res) {
       {
         userId: userDocument._id.toString(),
         group: "grp 42",
-        iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 50 * 60 * 60,
       },
-      "project3group42" //secret key
+      "project3group42", //secret key
+      {expiresIn:"24h"}
     );
 
     return res
       .status(200)
-      .send({ status: true, message: "Success", data: token });
+      .send({ status: true, message: "Token Successfully created", data: token });
   } catch (error) {
     return res.status(500).send({ status: false, msg: error.message });
   }
