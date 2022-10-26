@@ -34,6 +34,10 @@ const booksSchema = new mongoose.Schema(
       type: [String],
       require: true,
     },
+    bookCover:{
+      type:String,
+      require:true
+    },
     reviews: {
       type: Number,
       default: 0,

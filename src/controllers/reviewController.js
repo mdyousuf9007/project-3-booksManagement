@@ -216,7 +216,7 @@ const deleteReviewsById = async function (req, res) {
     }
     if (review.bookId.toString() !== bookId) {
       return res
-        .status(404)
+        .status(400)
         .send({ status: false, message: "Review not found for this book" });
     }
 

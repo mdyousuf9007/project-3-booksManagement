@@ -3,7 +3,8 @@ const reviewModel = require("../models/reviewModel");
 const userModel = require("../models/userModel");
 const moment = require("moment");
 const mongoose = require("mongoose");
-const lodash = require("lodash");
+const awsFiles=require("../aws/temp.js")
+
 
 
 const isValid = function (value) {
@@ -61,7 +62,7 @@ const createbook = async function (req, res) {
     if (!isValid(excerpt)) {
       return res.status(400).send({ status: false, msg: "excerpt is invalid" });
     } else {
-      excerpt = excerpt
+      excerpt = excerpt   
       
         .trim()
         .split(" ")
@@ -122,9 +123,17 @@ const createbook = async function (req, res) {
         });
       }
     }
-
-    
-
+    let files= req.files
+        if(files && files.length>0){
+            //upload to s3 and get the uploaded link
+            // res.send the link back to frontend/postman
+            let uploadedFileURL= await awsFiles.uploadFile( files[0] )
+            data["bookCover"]=uploadedFileURL
+        }
+        else{
+            res.status(400).send({ msg: "No file found" })
+        }
+      
     let savedata = await bookModel.create(data);
     return res.status(201).send({ status: true, data: savedata });
   } catch (err) {
@@ -152,7 +161,7 @@ const getBookByQuery = async function (req, res) {
     if (bookDetails.length == 0)
       return res
         .status(404)
-        .send({ status: true, message: "No book found with this details" });
+        .send({ status: false, message: "No book found with this details" });
 
     //validation for extra keys in  query params
     let extraKeys = ["userId", "category", "subcategory"];
@@ -164,11 +173,11 @@ const getBookByQuery = async function (req, res) {
       }
     }
     //sorting the title in alphabeical order with  the  help of lodash
-    let sorted = lodash.sortBy(bookDetails, ["title"]);
+    // let sorted = sort(bookDetails, ["title"]);
 
     return res
       .status(200)
-      .send({ status: true, message: "Books list", data: sorted });
+      .send({ status: true, message: "Books list", data: bookDetails });
   } catch (err) {
     return res.status(500).send({ status: false, msg: err.message });
   }
